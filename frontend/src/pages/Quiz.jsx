@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import { AlertCircle, ArrowRight, Check, ChevronLeft, X } from "lucide-react";
 import { toast } from "sonner";
@@ -20,7 +20,9 @@ const SUBJECT_LABELS = {
 };
 
 export default function Quiz() {
-  const { mode, subject } = useParams();
+  const { subject } = useParams();
+  const location = useLocation();
+  const mode = location.pathname.includes("/quiz/mock") ? "mock" : "practice";
   const { user } = useUser();
   const nav = useNavigate();
 

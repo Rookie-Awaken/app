@@ -101,7 +101,7 @@ export default function Result() {
         >
           <div className="flex items-center gap-2 text-xs uppercase tracking-widest font-bold text-slate-500">
             <Award className="w-4 h-4" style={{ color: prob.color }} />
-            GPCS Selection Probability
+            GPSC Selection Probability
           </div>
           <h2
             data-testid="result-probability-label"
