@@ -1,0 +1,107 @@
+{
+  "theme": "Light Theme",
+  "archetype": "Swiss & High-Contrast (Government Elite variant)",
+  "typography": {
+    "font_family": {
+      "heading": "'Noto Serif Gujarati', 'Noto Sans Gujarati', sans-serif",
+      "body": "'Noto Sans Gujarati', 'Inter', sans-serif"
+    },
+    "hierarchy": {
+      "h1": "text-4xl sm:text-5xl tracking-tight font-bold",
+      "h2": "text-2xl sm:text-3xl tracking-tight font-semibold",
+      "h3": "text-xl sm:text-2xl font-semibold",
+      "body": "text-base sm:text-lg leading-relaxed",
+      "small": "text-sm text-slate-500 uppercase tracking-widest"
+    }
+  },
+  "colors": {
+    "primary": "#13294B", 
+    "primary_hover": "#0F203D",
+    "accent": "#FF9933",
+    "accent_hover": "#E68A2E",
+    "background": "#F8FAFC",
+    "surface": "#FFFFFF",
+    "text": {
+      "main": "#0F172A",
+      "muted": "#64748B"
+    },
+    "feedback": {
+      "correct": "#16A34A",
+      "correct_bg": "#DCFCE7",
+      "wrong": "#DC2626",
+      "wrong_bg": "#FEE2E2"
+    },
+    "borders": "#E2E8F0"
+  },
+  "layouts": {
+    "spacing": {
+      "container_padding": "px-4 sm:px-6 md:px-8",
+      "section_gap": "gap-8 sm:gap-12",
+      "item_gap": "gap-4 sm:gap-6"
+    },
+    "grid": {
+      "dashboard_cards": "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6",
+      "quiz_options": "grid grid-cols-1 gap-4"
+    },
+    "mobile_first": true
+  },
+  "components": {
+    "buttons": {
+      "primary": "w-full min-h-[56px] rounded-xl bg-[#13294B] text-white font-bold text-lg flex items-center justify-center transition-transform active:scale-95 shadow-md",
+      "accent": "w-full min-h-[56px] rounded-xl bg-[#FF9933] text-white font-bold text-lg flex items-center justify-center transition-transform active:scale-95 shadow-md",
+      "quiz_option": "w-full min-h-[64px] p-4 rounded-xl border-2 text-left bg-white text-slate-800 font-medium transition-all duration-200 ease-in-out flex items-center gap-4 cursor-pointer",
+      "quiz_option_active": "border-[#13294B] bg-slate-50 ring-2 ring-[#13294B]/20",
+      "quiz_option_correct": "border-[#16A34A] bg-[#DCFCE7] text-[#16A34A]",
+      "quiz_option_wrong": "border-[#DC2626] bg-[#FEE2E2] text-[#DC2626]"
+    },
+    "cards": {
+      "dashboard": "bg-white rounded-2xl p-6 border border-slate-200 shadow-sm hover:shadow-md transition-shadow flex flex-col gap-4",
+      "result_summary": "bg-white rounded-3xl p-8 border border-slate-200 shadow-lg"
+    },
+    "header": {
+      "container": "sticky top-0 z-50 bg-white/80 backdrop-blur-xl border-b border-slate-200 px-4 h-16 flex items-center justify-between"
+    },
+    "timer": {
+      "container": "flex items-center gap-2 px-4 py-2 rounded-lg font-mono text-lg font-bold bg-slate-100 text-slate-700",
+      "urgent": "bg-red-100 text-red-600 animate-pulse"
+    }
+  },
+  "motion": {
+    "transitions": {
+      "default": "transition-all duration-200 ease-in-out",
+      "framer_page_enter": "{ initial: { opacity: 0, y: 10 }, animate: { opacity: 1, y: 0 }, exit: { opacity: 0, y: -10 } }",
+      "framer_list_stagger": "{ visible: { transition: { staggerChildren: 0.1 } } }",
+      "framer_item": "{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } }"
+    }
+  },
+  "accessibility": {
+    "contrast": "All text must pass APCA and WCAG AA standards. Saffron text should be used carefully on light backgrounds; use it for large elements or backgrounds with white text.",
+    "tap_targets": "Minimum 48px height for all interactive elements to accommodate mobile users.",
+    "focus_states": "focus:outline-none focus-visible:ring-4 focus-visible:ring-[#FF9933]/50",
+    "test_ids": "All interactive elements must have data-testid attributes."
+  },
+  "media": {
+    "image_urls": [
+      {
+        "url": "https://images.pexels.com/photos/11835216/pexels-photo-11835216.jpeg",
+        "category": "hero_background",
+        "description": "Adalaj Stepwell in Gujarat for cultural resonance on the landing/name entry screen."
+      },
+      {
+        "url": "https://images.pexels.com/photos/16504592/pexels-photo-16504592.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940",
+        "category": "student_illustration",
+        "description": "Indian student studying, for dashboard or empty states."
+      }
+    ]
+  },
+  "instructions_to_main_agent": [
+    "Ensure Noto Sans Gujarati is loaded via Google Fonts for proper Unicode rendering.",
+    "All questions and explanations must support proper wrapping for Gujarati text.",
+    "Quiz options must use custom large radio buttons for mobile ease.",
+    "Implement Net Score logic (+1, -0.33) updating live in the top right.",
+    "Use Recharts (RadarChart) for the final Performance Radar on the Result page.",
+    "Timer must switch to 'urgent' styling when under 10 minutes.",
+    "Framer Motion must be used for transitioning between quiz questions and dashboard states.",
+    "Always apply 'data-testid' to buttons, inputs, and clickable cards."
+  ]
+}
