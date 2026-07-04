@@ -3,6 +3,7 @@ from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
 import os
+import json
 import logging
 import random
 from pathlib import Path
@@ -12,6 +13,55 @@ import uuid
 from datetime import datetime, timezone
 
 from questions_data import QUESTIONS_SEED, SUBJECTS_META, SUBJECT_ORDER
+
+BANK_DIR = Path(__file__).parent / "questions_bank"
+
+
+def _norm_answer(ans):
+    """Accept answer as letter (A/B/C/D) or int (0-3). Return int 0-3."""
+    if isinstance(ans, int):
+        return ans
+    if isinstance(ans, str):
+        letter = ans.strip().upper()
+        mapping = {"A": 0, "B": 1, "C": 2, "D": 3}
+        if letter in mapping:
+            return mapping[letter]
+    raise ValueError(f"Invalid answer format: {ans!r}")
+
+
+def _load_bank_questions() -> List[dict]:
+    """Load all questions from JSON files under questions_bank/. Fallback to legacy seed if empty."""
+    docs = []
+    if BANK_DIR.exists():
+        for f in sorted(BANK_DIR.glob("*.json")):
+            subject_key = f.stem  # e.g. history.json -> history
+            try:
+                with open(f, "r", encoding="utf-8") as fh:
+                    items = json.load(fh)
+                for it in items:
+                    docs.append({
+                        "id": str(uuid.uuid4()),
+                        "subject": it.get("subject", subject_key),
+                        "question": it["question"],
+                        "options": it["options"],
+                        "answer": _norm_answer(it["answer"]),
+                        "explanation": it["explanation"],
+                    })
+            except Exception as e:
+                # Log and skip malformed file
+                print(f"[seed] failed to load {f}: {e}")
+    if not docs:
+        # Fallback to legacy python-defined seed
+        for q in QUESTIONS_SEED:
+            docs.append({
+                "id": str(uuid.uuid4()),
+                "subject": q["subject"],
+                "question": q["question"],
+                "options": q["options"],
+                "answer": _norm_answer(q["answer"]),
+                "explanation": q["explanation"],
+            })
+    return docs
 
 
 ROOT_DIR = Path(__file__).parent
@@ -107,23 +157,20 @@ class LeaderboardEntry(BaseModel):
 # ============ SEED ============
 @app.on_event("startup")
 async def seed_questions():
-    count = await db.questions.count_documents({})
-    if count == 0:
-        docs = []
-        for q in QUESTIONS_SEED:
-            docs.append({
-                "id": str(uuid.uuid4()),
-                "subject": q["subject"],
-                "question": q["question"],
-                "options": q["options"],
-                "answer": q["answer"],
-                "explanation": q["explanation"],
-            })
-        if docs:
-            await db.questions.insert_many(docs)
-            logger.info(f"Seeded {len(docs)} questions")
+    """Reseed questions if JSON bank differs from DB (drop + reload).
+    This lets us add batches (history.json, polity.json ...) and just restart backend."""
+    bank_docs = _load_bank_questions()
+    bank_count = len(bank_docs)
+    db_count = await db.questions.count_documents({})
+    if db_count != bank_count and bank_count > 0:
+        await db.questions.delete_many({})
+        await db.questions.insert_many(bank_docs)
+        logger.info(f"[seed] Replaced DB — dropped {db_count}, seeded {bank_count} questions")
+    elif db_count == 0 and bank_count > 0:
+        await db.questions.insert_many(bank_docs)
+        logger.info(f"[seed] Seeded {bank_count} questions")
     else:
-        logger.info(f"Questions collection already has {count} docs — skipping seed")
+        logger.info(f"[seed] Skipped — DB has {db_count} questions (bank: {bank_count})")
 
 
 # ============ ROUTES ============
