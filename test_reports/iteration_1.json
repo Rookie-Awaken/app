@@ -1,0 +1,50 @@
+{
+  "summary": "Backend fully green (13/13 pytest). Frontend has a CRITICAL routing bug: Quiz.jsx destructures `mode` from useParams() but neither route defines `:mode` — routes are `/quiz/practice/:subject` and `/quiz/mock`. This breaks both quiz flows.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [
+      {
+        "flow": "Practice quiz result submission",
+        "issue": "POST /api/results returns 422 'mode: Field required' because Quiz.jsx sends mode=undefined (mode is not in URL params). User sees 'પરિણામ સાચવવામાં ભૂલ' toast and is stuck on quiz. Result page never reached.",
+        "affected_selectors": ["quiz-next-btn"]
+      },
+      {
+        "flow": "Full Mock start",
+        "issue": "Clicking start-mock-btn navigates to /quiz/mock but Quiz.jsx (with mode=undefined) calls getPracticeQuestions(undefined,10) → GET /api/questions/practice/undefined → 404 → toast 'પ્રશ્નો લોડ કરવામાં ભૂલ' and redirects back to dashboard. Full Mock is completely broken.",
+        "affected_selectors": ["start-mock-btn", "quiz-timer"]
+      },
+      {
+        "flow": "Mock timer",
+        "issue": "Even if mock loaded, totalSeconds = mode === 'mock' ? 120*60 : 30*60 → since mode is undefined it falls to 30 min instead of 120 min (spec requires 120 min for mock).",
+        "affected_selectors": ["quiz-timer"]
+      }
+    ],
+    "design_issues": [
+      {"screen": "Result page probability card", "issues": ["Typo: label says 'GPCS Selection Probability' — should be 'GPSC'"]}
+    ]
+  },
+  "test_report_links": ["/app/backend/tests/backend_test.py", "/app/test_reports/pytest/pytest_results.xml"],
+  "action_items": [
+    "FIX CRITICAL: In /app/frontend/src/pages/Quiz.jsx, derive `mode` from route/pathname instead of useParams(). E.g. `const mode = location.pathname.includes('/quiz/mock') ? 'mock' : 'practice';` Or change routes to `/quiz/:mode/:subject?` and `/quiz/:mode` with mode segment. Currently mode is always undefined causing both practice submit (422) and mock question load (404) to fail.",
+    "Fix typo 'GPCS Selection Probability' → 'GPSC Selection Probability' in /app/frontend/src/pages/Result.jsx line ~104",
+    "Verify mock quiz per_subject count — app currently requests per_subject=10 (=70 questions) which matches product spec"
+  ],
+  "critical_code_review_comments": [
+    "Quiz.jsx mode-param bug is a routing/useParams mismatch — core defect blocking end-to-end use.",
+    "In Quiz.jsx finish(), the last picked answer is added via setAnswers (async) right before finish is called on the same click; state may not yet reflect the last answer. Currently mitigated because pick() runs on option-click but goNext runs on separate next-click, so state is settled. OK.",
+    "server.py sends `answer` and `explanation` in QuestionPublic — acceptable per doc comment (instant client-side feedback) but exposes correct answers to network — noted as intentional.",
+    "Header hides logout/user chip on /quiz/* routes (isQuiz check). This means user cannot logout during a quiz — acceptable UX but data-testid header-logout-btn is not accessible from quiz pages.",
+    "No pagination/limit safeguard on GET /leaderboard beyond limit=20 default — fine for MVP."
+  ],
+  "updated_files": ["/app/backend/tests/backend_test.py"],
+  "success_rate": {"backend": "100%", "frontend": "40%"},
+  "seed_data_creation": "Backend auto-seeds 70 questions on startup. Test users QA Tester / QA Tester2 / TEST_ResultUser created via /api/users during tests.",
+  "retest_needed": true,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Backend tests at /app/backend/tests/backend_test.py — 13/13 pass. Frontend critical routing bug in Quiz.jsx (mode param never resolved). After main agent fixes, re-run: (a) practice full-flow to Result page, (b) full mock loads 70 questions with 120:00 timer, (c) result page renders with Net Score, Probability label, radar SVG, 3 CTAs, (d) leaderboard filter chips.",
+  "rca_of_the_issue": "Root cause: Quiz.jsx line 23 `const { mode, subject } = useParams();` — the router paths `/quiz/practice/:subject` and `/quiz/mock` do NOT contain a `:mode` param, so `mode` is `undefined`. Downstream effects: (1) totalSeconds falls back to 30 min for mock; (2) useEffect calls getPracticeQuestions(undefined,10) for /quiz/mock → 404 error → redirect back to dashboard; (3) On practice submit, payload has mode=undefined → JSON.stringify drops the key → backend Pydantic ResultCreate.mode is required → 422. Reproduction: (i) Enter name, go to dashboard, click any subject card, answer 10 questions, click 'પરિણામ જુઓ' → toast 'પરિણામ સાચવવામાં ભૂલ', stuck. (ii) Click 'મોક શરૂ કરો' → immediately redirected back to dashboard with error toast. Fix suggestion: derive mode from useLocation().pathname or restructure routes to include :mode segment."
+}
