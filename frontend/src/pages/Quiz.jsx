@@ -41,8 +41,8 @@ export default function Quiz() {
     if (!user) { nav("/"); return; }
     setLoading(true);
     const p = mode === "mock"
-      ? api.getMockQuestions(10)
-      : api.getPracticeQuestions(subject, 10);
+      ? api.getMockQuestions(100)
+      : api.getPracticeQuestions(subject, 100);
     p.then((qs) => {
       if (!qs.length) {
         toast.error("પ્રશ્નો ઉપલબ્ધ નથી");
