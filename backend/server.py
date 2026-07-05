@@ -213,7 +213,7 @@ async def create_or_get_user(payload: UserCreate):
 
 
 @api_router.get("/questions/practice/{subject}", response_model=List[QuestionPublic])
-async def get_practice_questions(subject: str, limit: int = 10):
+async def get_practice_questions(subject: str, limit: int = 110):
     if subject not in SUBJECTS_META:
         raise HTTPException(status_code=404, detail="વિષય ઉપલબ્ધ નથી")
     docs = await db.questions.find({"subject": subject}, {"_id": 0}).to_list(1000)
@@ -222,7 +222,7 @@ async def get_practice_questions(subject: str, limit: int = 10):
 
 
 @api_router.get("/questions/mock", response_model=List[QuestionPublic])
-async def get_mock_questions(per_subject: int = 10):
+async def get_mock_questions(per_subject: int = 110):
     """Full mock: pull `per_subject` random questions from each subject."""
     all_qs: List[QuestionPublic] = []
     for subject in SUBJECT_ORDER:
