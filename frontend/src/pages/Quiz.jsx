@@ -42,7 +42,7 @@ export default function Quiz() {
     setLoading(true);
     const p = mode === "mock"
       ? api.getMockQuestions(110)
-      : api.getPracticeQuestions(subject, 110);
+      : api.getPracticeQuestions(subject, 770);
     p.then((qs) => {
       if (!qs.length) {
         toast.error("પ્રશ્નો ઉપલબ્ધ નથી");
@@ -66,7 +66,7 @@ export default function Quiz() {
       if (a.selected === null || a.selected === undefined) continue;
       s += a.is_correct ? 1 : -0.33;
     }
-    return Math.round(s * 100) / 100;
+    return Math.round(s * 110) / 110;
   }, [answers]);
 
   const pick = (i) => {
@@ -114,7 +114,7 @@ export default function Quiz() {
     // Count remaining unattempted as skipped
     const totalSkipped = skipped + Math.max(0, remaining);
     const total = questions.length;
-    const net = Math.round((correct * 1 - wrong * 0.33) * 100) / 100;
+    const net = Math.round((correct * 1 - wrong * 0.33) * 110) / 110;
 
     // Subject breakdown
     const breakdown = {};

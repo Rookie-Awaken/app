@@ -8,7 +8,7 @@ const client = axios.create({ baseURL: API });
 export const api = {
   getSubjects: async () => (await client.get("/subjects")).data,
   createUser: async (name) => (await client.post("/users", { name })).data,
-  getPracticeQuestions: async (subject, limit = 110) =>
+  getPracticeQuestions: async (subject, limit = 770) =>
     (await client.get(`/questions/practice/${subject}`, { params: { limit } })).data,
   getMockQuestions: async (per_subject = 110) =>
     (await client.get(`/questions/mock`, { params: { per_subject } })).data,
