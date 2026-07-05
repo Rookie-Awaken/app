@@ -22,7 +22,7 @@ def test_get_subjects(s):
     assert isinstance(data, list)
     assert len(data) == 7
     for subj in data:
-        assert subj["question_count"] == 10, f"{subj['key']} has {subj['question_count']} questions"
+        assert subj["question_count"] == 110, f"{subj['key']} has {subj['question_count']} questions"
         assert subj["name_gu"]
         assert subj["key"]
 
